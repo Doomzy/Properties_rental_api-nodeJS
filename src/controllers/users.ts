@@ -5,18 +5,22 @@ import { IUser } from '../types/types.js'
 import { paginator } from '../middlewares/helpers.js'
 
 async function createUser(req: Request, res: Response){
-    const userData: IUser= req.body.data// modify
     try{
-        const newUser: IUser= await User.create(userData)
-        res.status(201).json(newUser)
+        const userData: IUser= req.body.data
+        if(userData.role !== 'admin'){
+            const newUser: IUser= await User.create(userData)
+            res.status(201).json(newUser)
+        }else{
+            res.status(403).json({"err": "Not Authorized!"})
+        }
     }catch(e){
         res.status(500).json({'err': e.message})
     }
 }
 
 async function loginUser(req: Request, res: Response){
-    const {email, password}= req.body
     try{
+        const {email, password}= req.body
         const user: IUser= await User.login(email, password)
         const token: String= generateToken(user._id, user.role)
         res.status(200).json({"Token":token, user})
