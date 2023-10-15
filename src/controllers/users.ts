@@ -30,11 +30,17 @@ async function loginUser(req: Request, res: Response){
 }
 
 async function getUser(req: Request, res: Response){
-    const uid: string= req.params.id
     try{
-        const findUser: IUser= await User.findById(uid).select("-updatedAt -__v -password")
+        const uid: string= req.params.id
+        const findUser: IUser= await User.findById(uid)
+        .select(
+            uid === req.body.user?.id ?
+                "-updatedAt -__v -password"
+            :
+                "first_name last_name email createdAt"
+            )
         findUser? 
-            res.status(200).json({findUser}) 
+            res.status(200).json({"user_data":findUser}) 
         : 
             res.status(404).json({"err": "no user was found"})
     }catch(e){
